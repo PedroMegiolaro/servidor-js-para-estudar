@@ -1,0 +1,129 @@
+================================================================
+        PASSO A PASSO - SUBIR E ACESSAR O SERVIDOR
+================================================================
+
+
+----------------------------------------------------------------
+PARTE 1 - SUBINDO O SERVIDOR
+----------------------------------------------------------------
+
+PASSO 1 - Instalar o Node.js (apenas na primeira vez)
+  - Acesse https://nodejs.org e baixe a versão LTS
+  - Execute o instalador e siga as opções padrão
+  - Reinicie o VS Code após instalar
+
+  Confirme a instalação no terminal:
+    node -v
+    npm -v
+  Os dois devem retornar um número de versão.
+
+PASSO 2 - Abrir o terminal na pasta correta
+  No terminal do VS Code, digite:
+    cd C:\Users\unicpbraga\Downloads\servidor\servidor
+
+PASSO 3 - Instalar as dependências do projeto (apenas na primeira vez)
+  npm install
+
+  Isso vai instalar os pacotes usados no código:
+    - colors
+    - express
+    - body-parser
+    - mongodb
+    - ejs
+
+PASSO 4 - Iniciar o servidor
+  node servidor.js
+
+  Se funcionar, aparecerá no terminal:
+    "Servidor rodando ..." (com efeito colorido)
+
+  O servidor ficará rodando na porta 80 (definida na linha 21 do código).
+  Para parar o servidor: pressione CTRL + C no terminal.
+
+  !! ATENÇÃO: Se der erro de porta bloqueada, rode o VS Code
+  como Administrador e tente novamente. !!
+
+
+----------------------------------------------------------------
+PARTE 2 - ACESSANDO O SERVIDOR
+----------------------------------------------------------------
+
+Com o servidor rodando, abra o navegador e acesse:
+
+-------------------------------
+  PÁGINA INICIAL
+-------------------------------
+  http://localhost
+
+  O servidor redireciona automaticamente para contato.html
+  (definido na linha 29 do código).
+
+-------------------------------
+  PÁGINAS ESTÁTICAS
+-------------------------------
+  Arquivos da pasta /public acessados diretamente pela URL:
+
+  http://localhost/contato.html
+
+-------------------------------
+  ROTA /cadastrar via GET
+-------------------------------
+  Os dados são enviados pela própria URL:
+
+  http://localhost/cadastrar?nome=João&email=joao@email.com&telefone=11999999999&nascimento=2000-01-01
+
+  O servidor lê nome, email, telefone e nascimento
+  e exibe a página resposta.ejs com esses dados.
+
+-------------------------------
+  ROTA /for via GET
+-------------------------------
+  http://localhost/for?qtde=5
+
+  Envia uma quantidade para o template for.ejs.
+
+-------------------------------
+  ROTAS POST (via formulário HTML)
+-------------------------------
+  As rotas abaixo só funcionam enviando um formulário,
+  não funcionam digitando a URL direto no navegador.
+
+  Acesse contato.html, preencha o formulário e envie.
+  O formulário já aponta para a rota correta automaticamente.
+
+  Rotas POST disponíveis no código:
+    /cadastrar          -> cadastra com nome, email, telefone, nascimento
+    /cadastrar_usuario  -> cadastra no banco: nome, login, senha
+    /logar_usuario      -> busca no banco: login, senha
+    /atualizar_usuario  -> atualiza no banco: login, senha, novasenha
+    /remover_usuario    -> remove do banco: login, senha
+
+-------------------------------
+  TESTANDO ROTAS POST SEM FORMULÁRIO
+-------------------------------
+  Use o Thunder Client (extensão do VS Code) ou o Postman.
+
+  Exemplo - Cadastrar usuário:
+    URL:    http://localhost/cadastrar_usuario
+    Método: POST
+    Body (form): nome=João   login=joao123   senha=1234
+
+  Exemplo - Logar usuário:
+    URL:    http://localhost/logar_usuario
+    Método: POST
+    Body (form): login=joao123   senha=1234
+
+  Exemplo - Atualizar senha:
+    URL:    http://localhost/atualizar_usuario
+    Método: POST
+    Body (form): login=joao123   senha=1234   novasenha=9999
+
+  Exemplo - Remover usuário:
+    URL:    http://localhost/remover_usuario
+    Método: POST
+    Body (form): login=joao123   senha=1234
+
+
+================================================================
+                         FIM DO GUIA
+================================================================
