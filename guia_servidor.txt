@@ -1,0 +1,224 @@
+================================================================
+        GUIA COMPLETO - SERVIDOR NODE.JS (servidor.js)
+================================================================
+
+
+----------------------------------------------------------------
+PARTE 1 - COMO INICIAR O SERVIDOR
+----------------------------------------------------------------
+
+PASSO 1 - Instalar o Node.js
+  - Acesse: https://nodejs.org
+  - Baixe a versão LTS (recomendada)
+  - Execute o instalador .msi e siga os passos (opções padrão)
+  - Reinicie o VS Code após a instalação
+
+  Para verificar se instalou corretamente, abra o terminal e digite:
+    node -v
+    npm -v
+  Ambos devem mostrar um número de versão.
+
+PASSO 2 - Abrir a pasta correta no terminal
+  cd C:\Users\unicpbraga\Downloads\servidor\servidor
+
+PASSO 3 - Instalar as dependências
+  npm install
+
+PASSO 4 - Iniciar o servidor
+  node servidor.js
+
+  Se tudo estiver certo, aparecerá no terminal:
+  "Servidor rodando ..." (em cores)
+
+PASSO 5 - Acessar no navegador
+  http://localhost
+
+ATENÇÃO - MongoDB:
+  O servidor se conecta ao MongoDB Atlas na nuvem.
+  Se a conexão falhar, verifique:
+  - Se o usuário/senha no URI do MongoDB estão corretos (linha 9 do servidor.js)
+  - Se seu IP está liberado no painel do MongoDB Atlas
+    (MongoDB Atlas > Network Access > Add IP Address)
+
+
+----------------------------------------------------------------
+PARTE 2 - COMO ACESSAR O SERVIDOR
+----------------------------------------------------------------
+
+PÁGINA PRINCIPAL:
+  http://localhost
+  (redireciona automaticamente para contato.html)
+
+PÁGINAS ESTÁTICAS (pasta public):
+  http://localhost/contato.html
+  http://localhost/index.html
+  http://localhost/resposta.html
+
+ROTA GET /cadastrar (dados pela URL):
+  http://localhost/cadastrar?nome=João&email=joao@email.com&telefone=11999999999&nascimento=2000-01-01
+
+ROTA GET /for (loop com quantidade):
+  http://localhost/for?qtde=5
+
+ROTAS POST (precisam de formulário ou ferramenta):
+  As rotas POST não funcionam direto pela URL do navegador.
+  Use uma dessas opções:
+
+  Opção 1 - Pelo formulário HTML do próprio projeto:
+    Acesse contato.html e preencha o formulário normalmente.
+
+  Opção 2 - Pelo Thunder Client (já no VS Code) ou Postman:
+    Exemplo para cadastrar usuário:
+      URL:    http://localhost/cadastrar_usuario
+      Método: POST
+      Body:   nome=João  login=joao123  senha=1234
+
+    Outras rotas POST disponíveis:
+      http://localhost/logar_usuario
+      http://localhost/atualizar_usuario
+      http://localhost/remover_usuario
+
+SE NÃO ABRIR NO NAVEGADOR (porta 80 bloqueada):
+  Opção 1: Rode o VS Code como Administrador
+
+  Opção 2: Troque a porta no servidor.js (linha 21):
+    Mude de:  server.listen(80);
+    Para:     server.listen(3000);
+    E acesse: http://localhost:3000
+
+
+----------------------------------------------------------------
+PARTE 3 - EXPLICAÇÃO DO ARQUIVO servidor.js (LINHA A LINHA)
+----------------------------------------------------------------
+
+--- IMPORTAÇÃO DE PACOTES (linhas 1-6) ---
+
+  require("colors");
+    Carrega o pacote colors para colorir textos no terminal.
+    Não precisa guardar em variável pois modifica o objeto String automaticamente.
+
+  var http = require("http");
+    Importa o módulo nativo do Node.js para criar servidores HTTP.
+
+  var express = require("express");
+    Importa o Express, framework que facilita criar rotas e lidar com requisições web.
+
+  var bodyParser = require("body-parser");
+    Importa o body-parser, responsável por ler os dados que chegam no corpo das requisições.
+
+  var mongodb = require("mongodb");
+    Importa o driver oficial do MongoDB para conectar e manipular o banco de dados.
+
+--- CONEXÃO COM O MONGODB (linhas 8-10) ---
+
+  const MongoClient = mongodb.MongoClient;
+    Extrai a classe MongoClient do pacote mongodb — é ela que abre a conexão com o banco.
+
+  const uri = 'mongodb+srv://...';
+    A string de conexão (URI) com o banco MongoDB na nuvem (Atlas).
+    Contém usuário, senha e endereço do servidor.
+
+  const client = new MongoClient(uri, { useNewUrlParser: true });
+    Cria o objeto de conexão usando a URI.
+    useNewUrlParser: true usa o parser de URL mais moderno e estável.
+
+--- CONFIGURAÇÃO DO EXPRESS (linhas 13-18) ---
+
+  var app = express();
+    Cria a aplicação Express — objeto central que gerencia rotas e middlewares.
+
+  app.use(express.static("./public"));
+    Diz ao Express para servir arquivos estáticos (HTML, CSS, imagens) da pasta public.
+
+  app.use(bodyParser.urlencoded({extended: false }))
+    Configura o body-parser para ler dados de formulários HTML.
+    extended: false usa a biblioteca nativa querystring.
+
+  app.use(bodyParser.json())
+    Configura o body-parser para também ler dados no formato JSON.
+
+  app.set('view engine', 'ejs')
+    Define o EJS como motor de templates — permite criar HTML dinâmico com variáveis JS.
+
+  app.set('views', './views');
+    Diz ao Express onde ficam os arquivos de template .ejs (pasta views).
+
+--- CRIAÇÃO E INICIALIZAÇÃO DO SERVIDOR (linhas 20-23) ---
+
+  var server = http.createServer(app);
+    Cria o servidor HTTP passando o app do Express para tratar as requisições.
+
+  server.listen(80);
+    Coloca o servidor para escutar na porta 80 (porta padrão do HTTP).
+    Por isso acessa com http://localhost sem precisar digitar a porta.
+
+  console.log("Servidor rodando ...".rainbow);
+    Exibe a mensagem no terminal com o efeito arco-íris do pacote colors.
+
+--- ROTAS SIMPLES (linhas 28-58) ---
+
+  app.get('/', ...)
+    Quando o usuário acessa / (raiz do site), redireciona para contato.html.
+
+  app.get('/cadastrar', ...)
+    Rota GET para /cadastrar. Os dados chegam pela URL (?nome=...&email=...).
+    Lê cada campo com requisicao.query e renderiza o template resposta.ejs.
+
+  app.post('/cadastrar', ...)
+    Mesma rota /cadastrar, mas via POST — dados chegam no corpo da requisição.
+    Lê com requisicao.body em vez de requisicao.query.
+
+  app.get('/for', ...)
+    Recebe uma quantidade pela URL e envia para o template for.ejs.
+    Usado para demonstrar um loop for no EJS.
+
+--- CONEXÃO COM A COLEÇÃO DO BANCO (linhas 63-64) ---
+
+  var dbo = client.db("exemplo_bd");
+    Acessa (ou cria) o banco de dados chamado exemplo_bd no MongoDB.
+
+  var usuarios = dbo.collection("usuarios");
+    Acessa (ou cria) a coleção usuarios — equivalente a uma tabela no SQL.
+
+--- CRUD DE USUÁRIOS ---
+
+  POST /cadastrar_usuario
+    Monta um objeto com os dados do formulário (nome, login, senha)
+    e insere um documento na coleção usuarios usando insertOne().
+
+  POST /logar_usuario
+    Busca documentos onde login e senha batem usando find().
+    Se o array estiver vazio, usuário/senha não existe.
+    Se encontrar, login bem-sucedido.
+
+  POST /atualizar_usuario
+    Localiza o usuário pelo login+senha e atualiza somente a senha
+    usando o operador $set do MongoDB com updateOne().
+    Checa result.modifiedCount para saber se algo foi alterado.
+
+  POST /remover_usuario
+    Localiza o usuário pelo login+senha e remove o documento
+    usando deleteOne(). Usa result.deletedCount para confirmar a remoção.
+
+
+----------------------------------------------------------------
+RESUMO DO FLUXO COMPLETO
+----------------------------------------------------------------
+
+  Navegador
+     |
+     v
+  Porta 80 --> Express (app)
+     |
+     |-- /                   --> redireciona para contato.html
+     |-- /cadastrar (GET)    --> lê URL query --> renderiza resposta.ejs
+     |-- /cadastrar (POST)   --> lê body      --> renderiza resposta.ejs
+     |-- /for                --> lê qtde      --> renderiza for.ejs
+     |-- /cadastrar_usuario  --> insere no MongoDB
+     |-- /logar_usuario      --> busca no MongoDB
+     |-- /atualizar_usuario  --> atualiza no MongoDB
+     |-- /remover_usuario    --> remove do MongoDB
+
+================================================================
+                         FIM DO GUIA
+================================================================
